@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="admin.dao.LoginDao">
+
+    <select id="login" resultType="map">
+        select ename as "ename",password as "password",job as "job" from log_staff
+        <where>
+            <if test="ename != null and ename != ''">
+                ename = #{ename}
+            </if>
+            <if test="password != null and password != ''">
+             and    password = #{password}
+            </if>
+            <if test="job != null and job != ''">
+                and job = #{job}
+            </if>
+        </where>
+    </select>
+
+</mapper>

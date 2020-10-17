@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="admin.dao.StaffDao">
+
+    <update id="updateStaffMessage">
+        update log_staff set ename=#{ename},tel=#{tel},job=#{job},password=#{password} where eid=#{eid}
+    </update>
+    <!--    删除信息-->
+    <delete id="deleteStaffMessage">
+        delete from log_staff where eid = #{eid}
+    </delete>
+    <!--    添加信息-->
+    <insert id="insertStaffMessage">
+        insert into log_staff(eid,ename,tel,job,password) values (SEQ_STU.nextval,#{ename},#{tel},#{job},#{password})
+    </insert>
+
+    <select id="getStaffMessageCount" resultType="INTEGER">
+        select count(*) as co from log_staff
+        <where>
+            <if test="ename != null and ename !=''">
+                <![CDATA[and  ename like concat(concat('%',#{ename}),'%')]]>
+            </if>
+            <if test="job != null and job !=''">
+                <![CDATA[and  job like concat(concat('%',#{job}),'%')]]>
+            </if>
+            <if test="headMaster != null and headMaster != ''" >
+                and job not in ('管理员','校长')
+            </if>
+        </where>
+    </select>
+
+<!--    批量删除-->
+    <delete id="deleteStaffSomeMessage">
+        delete from log_staff where eid IN
+        <foreach collection="list" item="item" open="(" separator=","  close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="allStaffMessage" resultType="map">
+        select * from (select t.*,rownum as r from
+        (select eid as "eid" ,ename as "ename",tel as "tel",job as "job",password as "password" from log_staff
+        <where>
+            <if test="eid != null and eid !=''">
+                <![CDATA[and  eid  like concat(concat('%',#{eid}),'%')]]>
+            </if>
+            <if test="ename != null and ename !=''">
+                <![CDATA[and  ename like concat(concat('%',#{ename}),'%')]]>
+            </if>
+            <if test="job != null and job !=''">
+                <![CDATA[and  job like concat(concat('%',#{job}),'%')]]>
+            </if>
+            <if test="headMaster != null and headMaster != ''" >
+                and job not in ('管理员','校长')
+            </if>
+        </where>
+        ) t where rownum <![CDATA[<=]]>  #{endIndex})
+        where r <![CDATA[>=]]> #{startIndex}
+    </select>
+
+    <select id="staffCount" resultType="map">
+        select ename as "ename",NVL(CO,0) as "co" from LOG_SCHOOL a right join
+        (select count(*) as co,id from LOG_STUDENT group by id) b on a.id = b.id
+        right join LOG_STAFF c
+        on c.eid = a.eid
+        WHERE C.JOB NOT IN ('管理员','校长')
+    </select>
+</mapper>

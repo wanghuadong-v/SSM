@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="admin.dao.SchoolDao">
+
+    <update id="updateSchoolMessage">
+        update log_school set uname=#{uname},uaddr=#{uaddr},eid=#{eid} where id=#{id}
+    </update>
+    <!--    删除信息-->
+    <delete id="deleteSchoolMessage">
+        delete from log_school where id = #{id}
+    </delete>
+    <!--    添加信息-->
+    <insert id="insertSchoolMessage">
+        insert into log_school(id,uname,uaddr,eid) values (SEQ_STU.nextval,#{uname},#{uaddr},#{eid})
+    </insert>
+
+    <select id="getSchoolMessageCount" resultType="INTEGER">
+        select count(*) as co from log_school
+        <where>
+            <if test="uname != null and uname !=''">
+                <![CDATA[and  uname  like concat(concat('%',#{uname}),'%')]]>
+            </if>
+        </where>
+    </select>
+
+    <!--    批量删除-->
+    <delete id="deleteSchoolSomeMessage">
+        delete from log_school where id IN
+        <foreach collection="list" item="item" open="(" separator=","  close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="allSchoolMessage" resultType="map">
+        select * from (select t.*,rownum as r from
+        (select id as "id" ,uname as "uname",uaddr as "uaddr",ename as "ename" from LOG_SCHOOL a left join LOG_STAFF b on a.eid=b.eid
+        <where>
+            <if test="uname != null and uname !=''">
+                <![CDATA[and  uname  like concat(concat('%',#{uname}),'%')]]>
+            </if>
+        </where>
+        ) t where rownum <![CDATA[<=]]>  #{endIndex})
+        where r <![CDATA[>=]]> #{startIndex}
+    </select>
+
+
+    <select id="getStaffName" resultType="map">
+        select eid as "eid",ename as "ename" from log_staff
+    </select>
+
+    <select id="studentCount" resultType="map">
+       select uname as "uname",NVL(CO,0) as "co" from LOG_SCHOOL a right join
+       (select count(*) as co,id from LOG_STUDENT group by id) b on a.id = b.id
+    </select>
+
+
+
+
+
+
+</mapper>

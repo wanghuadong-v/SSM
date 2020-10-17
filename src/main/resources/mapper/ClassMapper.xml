@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="admin.dao.ClassDao">
+
+    <select id="getClassMessageCount" resultType="INTEGER">
+        select count(*) as co from log_class
+    </select>
+
+    <select id="allClassMessage" resultType="map">
+        select * from (select t.*,rownum as r from
+        (select clid as "clid" ,cliname as "cliname",to_char (opentime,'yyyy-mm-dd') as "opentime" from LOG_CLASS
+        ) t where rownum <![CDATA[<=]]>  #{endIndex})
+        where r <![CDATA[>=]]> #{startIndex}
+    </select>
+
+    <update id="updateClassMessage">
+        update log_class set cliname=#{cliname},opentime=to_date(#{opentime},'yyyy/mm/dd')  where clid=#{clid}
+    </update>
+    <!--    删除信息-->
+    <delete id="deleteClassMessage">
+        delete from log_class where clid = #{clid}
+    </delete>
+    <!--    添加信息-->
+    <insert id="insertClassMessage">
+        insert into log_class(clid,cliname,opentime) values (SEQ_STU.nextval,#{cliname},to_date(#{opentime},'yyyy/mm/dd'))
+    </insert>
+    <!--    批量删除-->
+    <delete id="deleteClassSomeMessage">
+        delete from log_class where clid IN
+        <foreach collection="list" item="item" open="(" separator=","  close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>
